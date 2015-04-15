@@ -2,6 +2,7 @@
  * Author: Shahrooz Sabet
  * Date: 20140628
  * */
+#region using
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -11,113 +12,112 @@ using System.Security.Permissions;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.Web.Security;
+#endregion
 
 // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
 [AspNetCompatibilityRequirements(RequirementsMode =
 AspNetCompatibilityRequirementsMode.Required)]
 public class Service : IService
 {
-	private const string TAG = "NmdMobileWCFService.Service";
-	public string GetData(int value)
-	{
-		Console.WriteLine(ServiceSecurityContext.Current.PrimaryIdentity.Name);
-		if (Roles.IsUserInRole("Enterprise"))
-		{
-			return string.Format("You entered: {0}", value);
-		}
-		else return "not authorized";
-	}
-	[PrincipalPermission(SecurityAction.Demand, Role = "Enterprise")]
-	public RefreshDataCT RefreshData(RefreshDataCT composite)
-	{
-		if (composite == null)
-			throw new ArgumentNullException("RefreshDataCT Is Null");
-		else if (string.IsNullOrWhiteSpace(composite.TableCode.ToString()))
-			throw new ArgumentException("TableCode IsNullOrWhiteSpace");
-		try
-		{
-			SetDbName(composite);
-			GetDataRefresh(composite);
+    private const string TAG = "NmdMobileWCFService.Service";
+    public string GetData(int value)
+    {
+        Console.WriteLine(ServiceSecurityContext.Current.PrimaryIdentity.Name);
+        if (Roles.IsUserInRole("Enterprise"))
+        {
+            return string.Format("You entered: {0}", value);
+        }
+        else return "not authorized";
+    }
+    [PrincipalPermission(SecurityAction.Demand, Role = "Enterprise")]
+    public RefreshDataCT RefreshData(RefreshDataCT composite)
+    {
+        if (composite == null)
+            throw new ArgumentNullException("RefreshDataCT Is Null");
+        else if (string.IsNullOrWhiteSpace(composite.TableCode.ToString()))
+            throw new ArgumentException("TableCode IsNullOrWhiteSpace");
+        try
+        {
+            SetDbName(composite);
+            GetDataRefresh(composite);
 
-		}
-		catch (Exception eDB)
-		{
-			Console.WriteLine(eDB);
-			Debug.WriteLine(eDB, TAG);
-		}
-		return composite;
-	}
+        }
+        catch (Exception eDB)
+        {
+            Console.WriteLine(eDB);
+            Debug.WriteLine(eDB, TAG);
+        }
+        return composite;
+    }
 
-	private void SetDbName(RefreshDataCT composite)
-	{
-		string StrSQL = "";
-		StrSQL = "Select * From WebActions Where CompanyCode=" + composite.CompanyCode + " And ActionCode=1";
-		//composite.StrDebug=GetConnectionString();
-		using (DataTable dtWebTableCode = NmdDBAdapter.ExecuteSQL(StrSQL))
-		{
-			composite.DbNameServer = ((string)dtWebTableCode.Rows[0]["DbNameServer"]).Trim();
-			composite.DbNameClient = ((string)dtWebTableCode.Rows[0]["DbNameClient"]).Trim();
-		}
-	}
+    private void SetDbName(RefreshDataCT composite)
+    {
+        //composite.StrDebug=GetConnectionString();
+        using (DataTable dtWebTableCode = NmdDBAdapter.ExecuteSQL("Select * From WebActions Where OrgID=" + composite.OrgID + " And ActionCode=1"))
+        {
+            composite.DbNameServer = ((string)dtWebTableCode.Rows[0]["DbNameServer"]).Trim();
+            composite.DbNameClient = ((string)dtWebTableCode.Rows[0]["DbNameClient"]).Trim();
+        }
+    }
 
-	private void GetDataRefresh(RefreshDataCT composite)
-	{
-		string StrSQL = "";
-		string DbNameServer = "";
-		string DbNameClient = "";
+    private void GetDataRefresh(RefreshDataCT composite)
+    {
+        string strSQL = "";
+        string dbNameServer = "";
+        string dbNameClient = "";
 
-		if (composite.TableCode > 1000)
-		{
-			DbNameServer = composite.DbNameServer + ".dbo.";
-			DbNameClient = composite.DbNameClient + ".dbo.";
-		}
+        if (composite.TableCode > 1000)
+        {
+            dbNameServer = composite.DbNameServer + ".dbo.";
+            dbNameClient = composite.DbNameClient + ".dbo.";
+        }
 
-		StrSQL = "Select * From " + DbNameServer + "WebTableCode Where CompanyCode=" + composite.CompanyCode + " And TableCode=" + composite.TableCode;
-		//composite.StrDebug=GetConnectionString();
-		using (DataTable dtWebTableCode = NmdDBAdapter.ExecuteSQL(StrSQL))
-		{
-			composite.TableName = ((string)dtWebTableCode.Rows[0]["TableName"]).Trim();
-			composite.HasCreateTable = false;
-			if ((int)dtWebTableCode.Rows[0]["TableDataVersion"] > composite.TableDataVersion)
-			{
-				composite.TableDataVersion = 0;
-				composite.HasCreateTable = true;
-			}
-			composite.QueryCreateTable = ((string)dtWebTableCode.Rows[0]["QueryCreateTable"]).Trim();
-			composite.QueryBeforeExec1 = ((string)dtWebTableCode.Rows[0]["QueryBeforeExec1"]).Trim();
-			composite.QueryBeforeExec2 = ((string)dtWebTableCode.Rows[0]["QueryBeforeExec2"]).Trim();
+        strSQL = "Select * From " + dbNameServer + "WebTableCode Where OrgID=" + composite.OrgID + " And TableCode=" + composite.TableCode;
+        //composite.StrDebug=GetConnectionString();
+        using (DataTable dtWebTableCode = NmdDBAdapter.ExecuteSQL(strSQL))
+        {
+            composite.TableName = ((string)dtWebTableCode.Rows[0]["TableName"]).Trim();
+            composite.HasCreateTable = false;
+            if ((int)dtWebTableCode.Rows[0]["TableDataVersion"] > composite.TableDataVersion)
+            {
+                composite.TableDataVersion = 0;
+                composite.HasCreateTable = true;
+            }
+            composite.QueryCreateTable = ((string)dtWebTableCode.Rows[0]["QueryCreateTable"]).Trim();
+            composite.QueryBeforeExec1 = ((string)dtWebTableCode.Rows[0]["QueryBeforeExec1"]).Trim();
+            composite.QueryBeforeExec2 = ((string)dtWebTableCode.Rows[0]["QueryBeforeExec2"]).Trim();
 
-			composite.QueryAfterExec1 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec1"]).Trim();
-			composite.QueryAfterExec2 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec2"]).Trim();
-			composite.QueryAfterExec3 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec3"]).Trim();
+            composite.QueryAfterExec1 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec1"]).Trim();
+            composite.QueryAfterExec2 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec2"]).Trim();
+            composite.QueryAfterExec3 = ((string)dtWebTableCode.Rows[0]["QueryAfterExec3"]).Trim();
 
-			composite.DeleteKey = ((string)dtWebTableCode.Rows[0]["DeleteKey"]).Trim();
-			composite.IsCreateTmpTable = (Int16)dtWebTableCode.Rows[0]["IsCreateTmpTable"];
+            composite.DeleteKey = ((string)dtWebTableCode.Rows[0]["DeleteKey"]).Trim();
+            composite.IsCreateTmpTable = (bool)dtWebTableCode.Rows[0]["IsCreateTmpTable"];
 
-			StrSQL = ((string)dtWebTableCode.Rows[0]["QueryGetData"]).Replace("@TableDataVersion", composite.TableDataVersion.ToString());
-			if (composite.TableCode > 1000)
-				StrSQL = ((string)StrSQL).Replace("@DbNameServer.dbo.", DbNameClient);
-			else
-				StrSQL = ((string)StrSQL).Replace("@DbNameServer.dbo.", DbNameServer);
+            strSQL = ((string)dtWebTableCode.Rows[0]["QueryGetData"]).Replace("@TableDataVersion", composite.TableDataVersion.ToString());
+            if (composite.TableCode > 1000)
+                strSQL = ((string)strSQL).Replace("@DbNameServer.dbo.", dbNameClient);
+            else
+                strSQL = ((string)strSQL).Replace("@DbNameServer.dbo.", dbNameServer);
 
-		}
+        }
 
-		//composite.Dt = ExecuteSQL(StrSQL);
-		//composite.MS = ToMemStream(ExecuteSQL(StrSQL));
-		composite.DataTableArray = ToMemStream(NmdDBAdapter.ExecuteSQL(StrSQL)).ToArray();
+        //composite.Dt = ExecuteSQL(StrSQL);
+        //composite.MS = ToMemStream(ExecuteSQL(StrSQL));
+        composite.DataTableArray = ToMemStream(NmdDBAdapter.ExecuteSQL(strSQL)).ToArray();
 
-	}
-	private MemoryStream ToMemStream(DataTable dt)
-	{
-		using (MemoryStream dtStream = new MemoryStream())
-		{
-			BinaryFormatter formatter = new BinaryFormatter();
-			formatter.Serialize(dtStream, dt);
-			dtStream.Flush();
-			dtStream.Seek(0, SeekOrigin.Begin);
-			return dtStream;
-		}
-	}
+    }
+    private MemoryStream ToMemStream(DataTable dt)
+    {
+        using (MemoryStream dtStream = new MemoryStream())
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(dtStream, dt);
+            dtStream.Flush();
+            dtStream.Seek(0, SeekOrigin.Begin);
+            return dtStream;
+        }
+    }
 }
 
 

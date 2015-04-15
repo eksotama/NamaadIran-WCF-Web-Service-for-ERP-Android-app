@@ -10,16 +10,16 @@ using System.ServiceModel;
 public interface IService
 {
 
-	/// <summary>
-	/// Gets the data, For testing purpose.
-	/// </summary>
-	/// <param name="value">The value.</param>
-	/// <returns>Echos the value</returns>
-	[OperationContract]
-	string GetData(int value);
+    /// <summary>
+    /// Gets the data, For testing purpose.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>Echos the value</returns>
+    [OperationContract]
+    string GetData(int value);
 
-	[OperationContract]
-	RefreshDataCT RefreshData(RefreshDataCT composite);
+    [OperationContract]
+    RefreshDataCT RefreshData(RefreshDataCT composite);
 
 }
 
@@ -28,48 +28,48 @@ public interface IService
 [DataContract]
 public class RefreshDataCT
 {
-	#region WebTableCode Column Definition
-	[DataMember]
-	public int CompanyCode { get; set; }
-	[DataMember]
-	public int TableCode { get; set; }
-	[DataMember]
-	public string TableName { get; set; }
-	[DataMember]
-	public int TableDataVersion { get; set; }
-	[DataMember]
-	public string QueryCreateTable { get; set; }
-	[DataMember]
-	public Int16 IsCreateTmpTable { get; set; }
-	[DataMember]
-	public string DeleteKey { get; set; }
-	[DataMember]
-	public string QueryBeforeExec1 { get; set; }// These fields are defined with its table's column for future use and currently are unused.
-	[DataMember]
-	public string QueryBeforeExec2 { get; set; }
-	[DataMember]
-	public string QueryAfterExec1 { get; set; }
-	[DataMember]
-	public string QueryAfterExec2 { get; set; }
-	[DataMember]
-	public string QueryAfterExec3 { get; set; }
-	#endregion
+    #region WebTableCode Column Definition
+    [DataMember]
+    public int OrgID { get; set; }
+    [DataMember]
+    public int TableCode { get; set; }
+    [DataMember]
+    public string TableName { get; set; }
+    [DataMember]
+    public int TableDataVersion { get; set; }
+    [DataMember]
+    public string QueryCreateTable { get; set; }
+    [DataMember]
+    public bool IsCreateTmpTable { get; set; }
+    [DataMember]
+    public string DeleteKey { get; set; }
+    [DataMember]
+    public string QueryBeforeExec1 { get; set; }// These fields are defined with its table's column for future use and currently are unused.
+    [DataMember]
+    public string QueryBeforeExec2 { get; set; }
+    [DataMember]
+    public string QueryAfterExec1 { get; set; }
+    [DataMember]
+    public string QueryAfterExec2 { get; set; }
+    [DataMember]
+    public string QueryAfterExec3 { get; set; }
+    #endregion
 
-	[DataMember]
-	public byte[] DataTableArray { get; set; }
+    [DataMember]
+    public byte[] DataTableArray { get; set; }
 
-	[DataMember]
-	public bool HasCreateTable { get; set; }
-	[DataMember]
-	public int UserCode { get; set; }
-	[DataMember]
-	public string DbNameClient { get; set; }
-	[DataMember]
-	public string DbNameServer { get; set; }
-	[DataMember]
-	public long Len { get; set; }// For debuging purpose
-	[DataMember]
-	public string StrDebug { get; set; }// For debuging purpose
+    [DataMember]
+    public bool HasCreateTable { get; set; }
+    [DataMember]
+    public int UserCode { get; set; }
+    [DataMember]
+    public string DbNameClient { get; set; }
+    [DataMember]
+    public string DbNameServer { get; set; }
+    [DataMember]
+    public long Len { get; set; }// For debuging purpose
+    [DataMember]
+    public string StrDebug { get; set; }// For debuging purpose
 
 }
 
